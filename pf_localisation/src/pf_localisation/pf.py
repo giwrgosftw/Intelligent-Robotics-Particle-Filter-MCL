@@ -35,7 +35,47 @@ class PFLocaliser(PFLocaliserBase):
         :Return:
             | (geometry_msgs.msg.PoseArray) poses of the particles
         """
-        pass
+        intX = initialpose.pose.pose.position.x 
+        intY = initialpose.pose.pose.position.y
+        intZ = initialpose.pose.pose.position.z 
+
+
+        posArray = PoseArray()
+ 
+        rotation = math.pi 
+
+
+        #Creating 10 particles
+        for i in range(0, 10):
+
+            x  = random.gauss(intX, 1)
+            y  = random.gauss(intY, 1)
+
+            rotation = random.gauss(0, math.pi)
+
+            pose = Pose()
+
+            quat_tf = [0, 1, 0, 0]
+            quat_tf[0] = x 
+            quat_tf[1] = y 
+            quat_tf[2] = intZ 
+
+            quat_msg = Quaternion(quat_tf[0], quat_tf[1], quat_tf[2], quat_tf[3])
+
+            myrotateQuaternion = rotateQuaternion(quat_msg, rotation)
+            
+            # position of the particles
+            pose.position.x  =  x 
+            pose.position.y  = y 
+            pose.position.z  = intZ
+
+            pose.orientation =  myrotateQuaternion
+            posArray.poses.append(pose)
+
+
+        posArray.header.frame_id = "map"
+   
+        return posArray
 
  
     
