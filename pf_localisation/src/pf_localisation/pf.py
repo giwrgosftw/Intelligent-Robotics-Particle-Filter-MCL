@@ -88,16 +88,26 @@ class PFLocaliser(PFLocaliserBase):
             | scan (sensor_msgs.msg.LaserScan): laser scan to use for update
 
          """
+        #getting the particles from particle cloud
         pose = self.particlecloud
         print(pose.poses)
+
+        myPose= Pose()
+
+        poseW = []
 
         # calculating weight of each particle based on laser sacan
         for i in range(len(pose.poses)):
             likeHweight = self.sensor_model.get_weight(scan, pose.poses[i])
             print("......................",likeHweight)
+            myPose = pose.poses[i]
+            myPose.orientation.w = likeHweight # a
+            poseW.append(myPose)  # adding position to a list wiht  update weights.
             #todo
             #process of elimination using roulette-wheel selection to choose high-weight particles
-        print(pose.poses.x)
+
+        #based on this list eilimate the pose wiht lower weights.    
+        print(myPose)
 
     def estimate_pose(self):
         """
