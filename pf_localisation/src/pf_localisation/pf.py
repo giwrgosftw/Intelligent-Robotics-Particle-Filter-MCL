@@ -15,9 +15,9 @@ class PFLocaliser(PFLocaliserBase):
         self.num_poses = 500
 
         # Need for the "not_update_cloud" function
-        self.last_odom_x = 0
-        self.last_odom_y = 0
-        self.last_odom_heading = 0
+        self.latest_odom_x = 0
+        self.latest_odom_y = 0
+        self.latest_odom_heading = 0
 
         # ----- Sensor model parameters
         self.NUMBER_PREDICTED_READINGS = 20  # Number of readings to predict
@@ -92,21 +92,21 @@ class PFLocaliser(PFLocaliserBase):
          """
         # --- Initially do not update the particles if no movement has been detected
 
-        # Keep the last odom as the previous one
+        # Keep the latest odom as the previous one
         prev_odom_list = [
-            self.prev_odom_x == self.last_odom_x,
-            self.prev_odom_y == self.last_odom_y,
-            self.prev_odom_heading == self.last_odom_heading
+            self.prev_odom_x == self.latest_odom_x,
+            self.prev_odom_y == self.latest_odom_y,
+            self.prev_odom_heading == self.latest_odom_heading
         ]
 
         # If: all are True (not 0), do nothing (the robot can move)
         if all(prev_odom_list):
             return
 
-        # Else: the previous odom is still the last one (so, do not move)
-        self.last_odom_x = self.prev_odom_x
-        self.last_odom_y = self.prev_odom_y
-        self.last_odom_heading = self.prev_odom_heading
+        # Else: the previous odom is still the latest one (so, do not move)
+        self.latest_odom_x = self.prev_odom_x
+        self.latest_odom_y = self.prev_odom_y
+        self.latest_odom_heading = self.prev_odom_heading
 
         # ---------------------------------------------------------------
 
@@ -161,7 +161,7 @@ class PFLocaliser(PFLocaliserBase):
             q = particles.orientation
             t = getHeading(q)  # Get heading (in radians) described by a given orientation
 
-            # Set a new random location
+            # Set a new random location proportional to weight
             # (random floating point number with gaussian distribution)
             rx = random.gauss(x, norm[i])
             ry = random.gauss(y, norm[i])
