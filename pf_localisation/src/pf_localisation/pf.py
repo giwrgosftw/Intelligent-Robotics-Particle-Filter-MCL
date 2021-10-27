@@ -124,7 +124,8 @@ class PFLocaliser(PFLocaliserBase):
 
         total = sum(weights)  # calculate the sum of the weights
 
-        # Normalize weights of the "weight" list (total contribution sums up to 1)
+        # Normalize weights of the "weight" list
+        # (total contribution sums up to 1 - decrease variance - higher accuracy in prediction)
         norm = [w / total for w in weights]
 
         # Total number of particles
@@ -143,31 +144,32 @@ class PFLocaliser(PFLocaliserBase):
         thold = 1 / M  # threshold = M^(-1)
         u = random.uniform(0, thold)  # distribution between 0 and threshold
         i = 0  # for the while loop
-        poseArray = PoseArray()  # Setting a new array of poses
+        poseArray = PoseArray()  # Setting a new array of poses/particles
 
         # For each particle
         for _ in range(M):
 
-            # Skip until next threshold reached
+            # Every particle with normalized weight over 1/N is guaranteed to be selected at least once
+            # So, skip until next threshold reached
             while u > cdf[i]:
                 i = i + 1
 
-            # Getting each current particle from the cloud
+            # Getting the existing selected particle from the cloud
             particles = self.particlecloud.poses[i]
 
-            # Keep its position and orientation
+            # Take its position and orientation
             x = particles.position.x
             y = particles.position.y
             q = particles.orientation
             t = getHeading(q)  # Get heading (in radians) described by a given orientation
 
-            # Set a new random location proportional to weight
+            # Set a new random location proportional to the normalized weight of the existing-selected particle
             # (random floating point number with gaussian distribution)
             rx = random.gauss(x, norm[i])
             ry = random.gauss(y, norm[i])
             rt = random.gauss(t, norm[i])
 
-            # Switch with a new location and orientation
+            # Using the above, create a new pose with a new location and orientation (resampling applies)
             rPoint = Point(rx, ry, 0.0)  # z usually is 0
             rotateQ = rotateQuaternion(q, rt - t)
             newPose = Pose(rPoint, rotateQ)
@@ -175,10 +177,10 @@ class PFLocaliser(PFLocaliserBase):
             # Increment threshold
             u = u + thold
 
-            # Add the new particle
+            # Add the new pose
             poseArray.poses.append(newPose)
 
-        # Update the particles
+        # Update/Replace the existing particles/poses with the new ones on the cloud
         self.particlecloud = poseArray
 
     def estimate_pose(self):
