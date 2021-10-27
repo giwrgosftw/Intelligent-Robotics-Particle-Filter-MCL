@@ -131,16 +131,17 @@ class PFLocaliser(PFLocaliserBase):
         # Total number of particles
         M = self.num_poses
 
-        # Generate the Cumulative distribution function
-        # using the above normalized weights
+        # Generate the Cumulative distribution function, using the above normalized weights
         cdf = []
         for i, n in enumerate(norm):
             if i == 0:
-                cdf.append(n)  # c[0] = w[1]
+                cdf.append(n)  # add the first weight by default
             else:
-                cdf.append(cdf[-1] + n)  # c[i] = c[i-1] + w
+                cdf.append(cdf[-1] + n)  # c[i] = c[i-1] + w, last c[i] will be equal to 1
 
-        # Resampling
+        # --- Resampling - Make sure each particle contributes proportional to its weight
+
+        # Set parameters
         thold = 1 / M  # threshold = M^(-1)
         u = random.uniform(0, thold)  # distribution between 0 and threshold
         i = 0  # for the while loop
@@ -150,11 +151,14 @@ class PFLocaliser(PFLocaliserBase):
         for _ in range(M):
 
             # Every particle with normalized weight over 1/N is guaranteed to be selected at least once
-            # So, skip until next threshold reached
+            # If u < cdf, means that there are no more contributions for this particle
+            # (exhausted all its chances, no more contributions for the next sample set)
+            # So, skip until the next threshold reached
             while u > cdf[i]:
                 i = i + 1
 
-            # Getting the existing selected particle from the cloud
+            # Reached a particle that has weight higher than u, thus, it can make contributions
+            # So, we are getting that particle from the cloud
             particles = self.particlecloud.poses[i]
 
             # Take its position and orientation
@@ -163,18 +167,20 @@ class PFLocaliser(PFLocaliserBase):
             q = particles.orientation
             t = getHeading(q)  # Get heading (in radians) described by a given orientation
 
-            # Set a new random location proportional to the normalized weight of the existing-selected particle
+            # Set a new random location proportional to the normalized weight of the current particle
             # (random floating point number with gaussian distribution)
             rx = random.gauss(x, norm[i])
             ry = random.gauss(y, norm[i])
             rt = random.gauss(t, norm[i])
 
-            # Using the above, create a new pose with a new location and orientation (resampling applies)
+            # Create a new particle/pose with a new location and orientation
+            # by using the above (existing particle's) info --> resampling applies
             rPoint = Point(rx, ry, 0.0)  # z usually is 0
             rotateQ = rotateQuaternion(q, rt - t)
             newPose = Pose(rPoint, rotateQ)
 
-            # Increment threshold
+            # If the particle appear once, increment threshold
+            # This declares if the contributions of the current particle are exhausted or not
             u = u + thold
 
             # Add the new pose
