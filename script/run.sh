@@ -8,6 +8,6 @@ gnome-terminal -x bash -c "rosrun stage_ros stageros '/home/'$USER'/catkin_ws/sr
 sleep 4
 gnome-terminal -x bash -c "rosrun tf static_transform_publisher 0 0 0 0 0 0 1 /map /odom 100" xdotool getactivewindow windowminimize
 sleep 4
-gnome-terminal -x bash -c "rosrun rviz rviz -d /home/'$USER'/catkin_ws/src/assignment_1/run.rviz" xdotool getactivewindow windowminimize
+gnome-terminal -x bash -c "rosrun rviz rviz -d /home/'$USER'/catkin_ws/src/rviz/run.rviz" xdotool getactivewindow windowminimize
 sleep 4
 gnome-terminal -x bash -c "roslaunch socspioneer keyboard_teleop.launch" xdotool getactivewindow windowminimize
