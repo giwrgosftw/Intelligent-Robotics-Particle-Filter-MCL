@@ -16,8 +16,9 @@ The rosbag contains data published on the following topics as the robot was bein
 
 ## How to run (tested on Linux Ubuntu 20.04.3)
 1. Read the README.md file in the following repository link for further instructions on how to compile and use the package (https://github.com/JonFreer/pf_localisation)
-2. Download the GitHub repository files and add/replace the downloaded "pf_localisation" and "rviz" folders to the "/catkin_ws/src/" folder
-3. Place the "run.sh" file on your desktop and run it through your terminal (check README.md inside the "script" folder for further instructions)
+2. After the above step, you should also have the "socspioneer" folder in your "/catkin_ws/src/" space 
+3. Download the GitHub repository files and add/replace the downloaded "pf_localisation" and "rviz" folders to the "/catkin_ws/src/" folder
+4. Place the "run.sh" file on your desktop and run it through your terminal (check README.md inside the "script" folder for further instructions)
 
 ## Demo video link
 https://youtu.be/Eb6K9apxAm0
